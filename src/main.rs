@@ -1,12 +1,16 @@
 use std::{fs, io::{BufRead, BufReader, Write}, net::{TcpListener, TcpStream}, thread, time::Duration};
 
+use hserver::ThreadPool;
 fn main(){
     let listner = TcpListener::bind("127.0.0.1:8787").unwrap();
 
+    // fixed thread pool to avoid bad behavier like ddos
+
+    let pool = ThreadPool::new(4);
     for stream in listner.incoming() {
         let stream = stream.unwrap();
 
-        thread::spawn(|| {
+        pool.excute(|| {
             handle_conn(stream);
         });
         
@@ -34,7 +38,6 @@ fn handle_conn(mut stream: TcpStream) {
 
     stream.write_all(response.as_bytes()).unwrap();
     
-
 
 
 }
